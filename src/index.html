@@ -13,14 +13,43 @@
 </head>
 
 <body>
-    <section id="form-section">
+    <section>
         <form onsubmit="loadFile( ); event.preventDefault( )">
             <input id="file-name" type="file" onchange="loadFile()" />
         </form>
 
+    </section>
+
+    <section id="talking-forms-section">
         <form id="talking-start-form">
             <div>
-                <h4>When does the talking start?</h4>
+                <label for="talking-start-hours">1. When does the talking start?</label>
+
+                <div class="time-inputs">
+                    <input id="talking-start-hours" class="hours" type="number" placeholder="00" min="0" max="99" maxlength="2" /> :
+                    <input class="minutes" type="number" placeholder="00" min="0" max="59" maxlength="2" /> :
+                    <input class="seconds" type="number" placeholder="00" min="0" max="59" maxlength="2" /> .
+                    <input class="milliseconds" type="number" placeholder="000" min="0" max="999" maxlength="3" />
+                </div>
+            </div>
+        </form>
+
+        <form id="talking-end-form">
+            <div>
+                <label for="talking-end-hours">2. When does the talking end?</label>
+
+                <div class="time-inputs">
+                    <input id="talking-end-hours" class="hours" type="number" placeholder="00" min="0" max="99" maxlength="2" /> :
+                    <input class="minutes" type="number" placeholder="00" min="0" max="59" maxlength="2" /> :
+                    <input class="seconds" type="number" placeholder="00" min="0" max="59" maxlength="2" /> .
+                    <input class="milliseconds" type="number" placeholder="000" min="0" max="999" maxlength="3" />
+                </div>
+            </div>
+        </form>
+
+        <form id="subtitle-start-form" onsubmit="setNewFileStart( ); event.preventDefault( );">
+            <div>
+                <label for="hours">When should the first subtitle start?</label>
 
                 <div class="time-inputs">
                     <input class="hours" type="number" placeholder="00" min="0" max="99" maxlength="2" /> :
@@ -29,11 +58,12 @@
                     <input class="milliseconds" type="number" placeholder="000" min="0" max="999" maxlength="3" />
                 </div>
             </div>
+            <button type="submit">Save</button>
         </form>
 
-        <form id="subtitle-start-form" onsubmit="setNewFileStart( ); event.preventDefault( )">
+        <form id="subtitle-end-form" onsubmit="setNewFileEnd( ); event.preventDefault( );">
             <div>
-                <label for="hours">First Subtitle Start</label>
+                <label for="hours">When should the last subtitle end?</label>
 
                 <div class="time-inputs">
                     <input class="hours" type="number" placeholder="00" min="0" max="99" maxlength="2" /> :
@@ -54,315 +84,52 @@
             <button type="submit">Save</button>
         </form>
         -->
+
     </section>
 
-    <h4>Select the subtitle for that moment.</h4>
-    <section id="time-scale-section">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-    </section>
-    <section id="subtitle-section"></section>
-
-    <script>
-        //alert( ( typeof process !== 'undefined' ) );
-
-        let fs = null;
-
-        // If running with node webkit
-        if( typeof process !== "undefined" ) {
-            fs = require( "fs" );
-        }
-
-        let filePath = "";
-        let startTime = null;
-        let subtitles = [];
-
-        let timeInputs = document.querySelectorAll( ".time-inputs input" );
-        let talkingTimeInputs = document.querySelectorAll( "#talking-start-form .time-inputs input" );
-        let subtitleTimeInputs = document.querySelectorAll( "#subtitle-start-form .time-inputs input" );
-
-        talkingTimeInputs[0].focus();
-
-        for( let i = 0; i < timeInputs.length; i++ ) {
-            let input = timeInputs[i];
-            input.onkeydown = ( event ) => {
-                input.oldValue = input.value;
-            }
-
-            input.oninput = ( event ) => {
-                if( input.checkValidity() == false ) {
-                    input.value = input.oldValue;
-                    input.classList.remove( "invalid" );
-                    setTimeout( () => { input.classList.add( "invalid" ); }, 1 );
-                } else if( input.value.length >= input.maxLength ) {
-
-                    // Cut off leading zeros when necessary
-                    if( input.value.length > input.maxLength ) input.value = +input.value;
-
-                    if( i < timeInputs.length - 1 ) {
-                        timeInputs[i + 1].focus();
-                    }
-                }
-            }
-
-            input.onfocus = ( event ) => {
-                input.select();
-            }
-
-            input.onblur = ( event ) => {
-                if( input.value.length < input.maxLength ) {
-                    input.value = input.value.padStart( input.maxLength, '0' );
-                }
-            }
-        }
-
-        function loadFile( specificFilePath = "" ) {
-            let buffer = "";
-
-            if( specificFilePath == "" ) {
-                // Hold the name here temporarily, in case the fetch fails
-                buffer = document.getElementById( "file-name" ).value;
-            } else {
-                buffer = specificFilePath;
-            }
-
-            //buffer = "C:\\Users\\Joe\\Source\\Repos\\subtitle-fixer\\Game of Thrones S07E06.srt";
-            if( fs == null ) {
-                console.log( "Note: filesystem module (fs) not found." );
-                // Cut off the path, before the file name
-                buffer = buffer.split( /(\\|\/)/g ).pop();
-                fetch( buffer )
-                    .then( ( response ) => {
-                        return response.text();
-                    } )
-                    .then( ( text ) => {
-                        callback( text, buffer );
-                    } );
-            } else {
-                fs.readFile( buffer, "utf8", ( err, text ) => {
-                    if( err ) throw err;
-                    callback( text, buffer );
-                } );
-            }
-
-            function callback( text, buffer ) {
-                filePath = buffer;
-
-                startTime = new Date();
-                startTime.setHours( 0 );
-                startTime.setMinutes( 0 );
-                startTime.setSeconds( 0 );
-                startTime.setMilliseconds( 0 );
-
-                subtitles = srtToSubtitles( text );
-
-                if( subtitles.length <= 0 ) {
-                    console.error( "No subtitles in file." );
-                } else {
-                    subtitleTimeInputs[0].value = ( "" + subtitles[0].start.getHours() ).padStart( 2, '0' );
-                    subtitleTimeInputs[1].value = ( "" + subtitles[0].start.getMinutes() ).padStart( 2, '0' );
-                    subtitleTimeInputs[2].value = ( "" + subtitles[0].start.getSeconds() ).padStart( 2, '0' );
-                    subtitleTimeInputs[3].value = ( "" + subtitles[0].start.getMilliseconds() ).padStart( 3, '0' );
-
-                    talkingTimeInputs[0].value = ( "" + subtitles[0].start.getHours() ).padStart( 2, '0' );
-                    talkingTimeInputs[1].value = ( "" + subtitles[0].start.getMinutes() ).padStart( 2, '0' );
-                    talkingTimeInputs[2].value = ( "" + subtitles[0].start.getSeconds() ).padStart( 2, '0' );
-                    talkingTimeInputs[3].value = ( "" + subtitles[0].start.getMilliseconds() ).padStart( 3, '0' );
-
-                    talkingTimeInputs[0].focus();
-                }
-
-                let section = document.getElementById( "subtitle-section" );
-
-                let timeLimit = 5 * 60 * 1000;
-                // NOTE: Browsers don't support more columns
-                const COLUMN_LIMIT = 1000;
-                let increment = parseInt( timeLimit / COLUMN_LIMIT );
-
-                section.style.gridTemplateColumns = `repeat(${COLUMN_LIMIT}, auto)`;
-
-                // Empty the section first
-                section.innerHTML = "";
-
-                for( let subtitle of subtitles ) {
-
-                    if( ( subtitle.start - startTime + increment ) / increment > timeLimit / increment ) {
-                        break;
-                    }
-
-                    let startColumn = parseInt( ( subtitle.start - startTime + increment ) / increment );
-                    let endColumn = parseInt( ( subtitle.end - startTime + increment ) / increment );
-
-                    let element = new CustomElement( `<div class="subtitle" style="grid-column: ${startColumn} / ${endColumn}"></div>` );
-                    element.dataset.timePeriod = dateToSrtTime( subtitle.start );
-                    element.dataset.text = subtitle.text;
-                    element.dataset.index = subtitle.index;
-                    element.onclick = ( event ) => {
-                        let newFirstSubtitle = subtitle;
-                        let buffer = subtitles[0];
-
-                        // Delete every subtitle before the new first subtitle
-                        while( buffer != newFirstSubtitle ) {
-                            subtitles.shift();
-                            buffer = subtitles[0];
-                        }
-
-                        subtitleTimeInputs[0].value = talkingTimeInputs[0].value;
-                        subtitleTimeInputs[1].value = talkingTimeInputs[1].value;
-                        subtitleTimeInputs[2].value = talkingTimeInputs[2].value;
-                        subtitleTimeInputs[3].value = talkingTimeInputs[3].value;
-                        setNewFileStart();
-                    }
-
-                    section.appendChild( element );
-                }
-            }
-        }
-
-
-        function setNewFileStart() {
-            let newStart = new Date();
-            newStart.setHours( subtitleTimeInputs[0].value );
-            newStart.setMinutes( subtitleTimeInputs[1].value );
-            newStart.setSeconds( subtitleTimeInputs[2].value );
-            newStart.setMilliseconds( subtitleTimeInputs[3].value );
-
-            let difference = newStart - subtitles[0].start;
-
-            for( let subtitle of subtitles ) {
-                subtitle.start = new Date( subtitle.start.getTime() + difference );
-                subtitle.end = new Date( subtitle.end.getTime() + difference );
-            }
-
-            saveFile();
-        }
-
-
-        function offsetFile() {
-            let offset = parseInt( document.getElementById( "offset" ).value.trim() ) || 0;
-            for( let subtitle of subtitles ) {
-                subtitle.start.setMilliseconds( subtitle.start.getMilliseconds() + offset );
-                subtitle.end.setMilliseconds( subtitle.end.getMilliseconds() + offset );
-            }
-
-            document.getElementById( "offset" ).value = "";
-
-            saveFile();
-        }
-
-
-        function saveFile() {
-            let text = subtitlesToSrt( subtitles );
-
-            if( fs == null ) {
-                console.log( "Note: filesystem module (fs) not found." );
-                downloadAsSrtFile( text, document.getElementById( "file-name" ).value );
-            } else {
-                fs.writeFile( filePath, text, function ( err ) {
-                    if( err ) {
-                        return console.error( err );
-                    }
-
-                    loadFile( filePath );
-                } );
-            }
-        }
-
-        function srtToSubtitles( text ) {
-
-            let subtitles = [];
-            let lines = text.split( /\r\n|\r|\n/ );
-
-            for( let i = 1; i < lines.length; i++ ) {
-
-                // NOTE: Must start i at 1 and decrement here to work with the while loop
-                i--;
-
-                let subtitle = {
-                    start: srtTimeToDate( lines[i + 1].split( "-->" )[0] ),
-                    end: srtTimeToDate( lines[i + 1].split( "-->" )[1] ),
-                    text: lines[i + 2]
-                };
-                subtitles.push( subtitle );
-
-                i += 3;
-
-                // While the line at i is not an index
-                // NOTE: This condition will likely correctly find the index 99.99% of the time,
-                //       but subtitle text containing only a number followed by what looks like a subtitle time period may break it
-                while( i < lines.length && !( +( lines[i].trim() ) == lines[i] && /(\d:\d).*(-->).*(\d:\d)/.test( lines[i + 1] ) ) ) {
-                    subtitle.text += "\r\n" + lines[i];
-                    i++;
-                }
-            }
-
-            return subtitles;
-        }
-
-        function srtTimeToDate( timeString ) {
-            let dateTime = new Date();
-            let parts = timeString.split( ":" );
-            let buffer = parts[2].split( "," );
-            parts[2] = buffer[0];
-            parts[3] = buffer[1];
-
-            dateTime.setHours( parts[0] );
-            dateTime.setMinutes( parts[1] );
-            dateTime.setSeconds( parts[2] );
-            dateTime.setMilliseconds( parts[3] );
-
-            return dateTime;
-        }
-
-        function dateToSrtTime( dateTime ) {
-            let parts = [];
-            parts[0] = ( "" + dateTime.getHours() ).padStart( 2, '0' );
-            parts[1] = ( "" + dateTime.getMinutes() ).padStart( 2, '0' );
-            parts[2] = ( "" + dateTime.getSeconds() ).padStart( 2, '0' );
-            parts[3] = ( "" + dateTime.getMilliseconds() ).padStart( 3, '0' );
-            let timeString = `${parts[0]}:${parts[1]}:${parts[2]},${parts[3]}`;
-            return timeString;
-        }
-
-        function subtitlesToSrt( subtitles ) {
-            let text = "";
-            let i = 0;
-
-            // NOTE: Do NOT rely on i being the expected valid index/key (i.e. subtitles[i])
-            for( let subtitle of subtitles ) {
-                text += ( i + 1 ) + "\r\n";
-                text += `${dateToSrtTime( subtitle.start )} --> ${dateToSrtTime( subtitle.end )}\r\n`;
-                text += subtitle.text + "\r\n";
-                //text += "\r\n";
-                i++;
-            }
-
-            return text;
-        }
-
-        function downloadAsSrtFile( text, fileName ) {
-            let blob = new Blob( [text], {
-                type: "text/plain"
-            } );
-            const url = window.URL.createObjectURL( blob );
-            const a = document.createElement( "a" );
-            a.style.display = "none";
-            a.href = url;
-
-            a.download = fileName.split( /(\\|\/)/g ).pop();
-            document.body.appendChild( a );
-            a.click();
-            window.URL.revokeObjectURL( url );
-        }
-
-
-    </script>
+    <form id="first-subtitle-form" onsubmit="setFirstSubtitle( ); event.preventDefault( )">
+        <input type="hidden" />
+        <label>3. Select the first subtitle.</label>
+        <div class="subtitles-time-period"></div>
+        <div class="time-scale">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="subtitles"></div>
+        <div class="subtitles-time-period-controls">
+            <button type="button" onclick="previousSubtitlePage(event.target.closest('form'))">&lt;</button>
+            <button type="button" onclick="nextSubtitlePage(event.target.closest('form'))">&gt;</button>
+        </div>
+    </form>
+
+    <form id="last-subtitle-form" onsubmit="setLastSubtitle( ); event.preventDefault( )">
+        <input type="hidden" />
+        <label>4. Select the last subtitle.</label>
+        <div class="subtitles-time-period"></div>
+        <div class="time-scale">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="subtitles"></div>
+        <div class="subtitles-time-period-controls">
+            <button type="button" onclick="previousSubtitlePage(event.target.closest('form'))">&lt;</button>
+            <button type="button" onclick="nextSubtitlePage(event.target.closest('form'))">&gt;</button>
+        </div>
+    </form>
+
+    <script src="index.js"></script>
 </body>
 
 </html>

@@ -3,7 +3,14 @@ body {
     font-size: 25px;
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
-    width: 1000px;
+}
+
+section {
+    padding: 20px;
+}
+
+form {
+    padding: 10px;
 }
 
 input,
@@ -28,22 +35,28 @@ button {
 
 label {
     display: block;
-}
-
-form div {
-    padding: 15px;
+    font-weight: bold;
 }
 
 input[type='number']::-webkit-inner-spin-button {
     -webkit-appearance: none;
 }
 
-#form-section{
-    padding: 10px;
-    margin-bottom: 20px;
+#talking-forms-section {
+    display: none;
+}
+
+.file-selected #talking-forms-section {
+    display: flex;
+    justify-content: space-evenly;
 }
 
 #subtitle-start-form {
+    /* NOTE: This form no longer needs to be visible */
+    display: none;
+}
+
+#subtitle-end-form {
     /* NOTE: This form no longer needs to be visible */
     display: none;
 }
@@ -65,13 +78,28 @@ input[type='number']::-webkit-inner-spin-button {
     animation-duration: 3s;
 }
 
-#subtitle-section {
+#first-subtitle-form {
+    display: none;
+}
+
+.file-selected #first-subtitle-form {
+    display: block;
+}
+
+#last-subtitle-form {
+    display: none;
+}
+
+.file-selected #last-subtitle-form {
+    display: block;
+}
+
+.subtitles {
     display: grid;
     /* NOTE: This will be set by javascript */
     /* grid-template-columns: repeat(1000, auto); */
     grid-template-rows: auto;
     grid-gap: 1px;
-    margin-bottom: 200px;
     background-color: rgb(202, 205, 255);
 }
 
@@ -100,27 +128,26 @@ input[type='number']::-webkit-inner-spin-button {
     pointer-events:none;
 }
 
-.subtitle:hover::after:hover {
-    display: none;
-}
-
-#time-scale-section {
+.time-scale {
     display: grid;
-    /* NOTE: This will be set by javascript */
-    /* grid-template-columns: repeat(1000, auto); */
     grid-template-rows: auto;
     align-items: end;
     margin-bottom: -32px;
 }
 
-#time-scale-section div {
+.time-scale div {
     border-left: 1px solid #000;
     height: 37px;
     grid-row: 1;
 }
 
-#time-scale-section div:last-child {
+.time-scale div:last-child {
     border-right: 1px solid #000;
+}
+
+.subtitles-time-period::after {
+    content: attr(data-subtitle-time-period);
+    font-size: 14px;
 }
 
 @keyframes invalid-ping {
