@@ -3,17 +3,17 @@ Perform offsetting, linear correction, and/or cropping of subtitles easily and i
 
 ![Example](https://i.imgur.com/edDmmFj.png)
 
-### Installing
+## Installing
 
 Subtitle Fixer can either be run as a native app with [nw.js](https://nwjs.io/) (recommended), or as a web app.
 
-##### Native (nw.js)
+### Native (nw.js)
 
 1. [Download](https://nwjs.io/downloads/) and extract the Normal version of nw.js
 1. Copy this repository into the same folder as nw.js (including src/ and package.json)
 1. Run nw.exe
 
-##### Web
+### Web
 
 Host Subtitle Fixer using your web server and browser of choice.
 
