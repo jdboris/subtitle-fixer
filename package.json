@@ -1,0 +1,12 @@
+{
+    "name": "subtitle-fixer",
+    "version": "1.0.0",
+    "main": "src/index.html",
+    "window": {
+        "title": "Subtitle Fixer",
+        "width": 1200,
+        "height": 530,
+        "min_width": 1200,
+        "min_height": 530
+    }
+}
