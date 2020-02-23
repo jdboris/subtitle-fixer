@@ -188,7 +188,7 @@ function previousSubtitlePage( form ) {
 
 function setFirstSubtitle() {
 
-    let firstSubtitleForm = document.getElementById( "last-subtitle-form" );
+    let firstSubtitleForm = document.getElementById( "first-subtitle-form" );
     let chosenSubtitleInput = firstSubtitleForm.getElementsByTagName( "input" )[0];
     let subtitleStartForm = document.getElementById( "subtitle-start-form" );
     let subtitleStartInputs = subtitleStartForm.getElementsByTagName( "input" );
