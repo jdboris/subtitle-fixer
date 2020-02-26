@@ -3,7 +3,7 @@ Perform offsetting, linear correction, and/or cropping of subtitles easily and i
 
 ![Example](https://i.imgur.com/edDmmFj.png)
 
-## Installing
+## Installation
 
 Subtitle Fixer can either be run as a native app with [nw.js](https://nwjs.io/) (recommended), or as a web app.
 
