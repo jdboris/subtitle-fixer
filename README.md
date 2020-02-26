@@ -1,4 +1,4 @@
-# subtitle-fixer
+# Subtitle Fixer
 Perform offsetting, linear correction, and/or cropping of subtitles easily and intuitively.
 
 ![Example](https://i.imgur.com/edDmmFj.png)
